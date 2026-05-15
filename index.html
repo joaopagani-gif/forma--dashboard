@@ -6,115 +6,82 @@
 <title>FORMAÊ — Adesômetro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
-  :root {
-    --bg: #0e0f11; --surface: #16181c; --card: #1c1f25;
-    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
-    --text: #f0f0f0; --muted: #7a7f8a; --subtle: #3a3f4a;
-    --green: #3ecf8e; --green-dim: rgba(62,207,142,0.12);
-    --red: #f87171; --red-dim: rgba(248,113,113,0.12);
-    --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10);
-    --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.10);
-    --accent: #a78bfa;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
-  
-  header { padding: 28px 32px 0; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-  .logo { display: flex; align-items: center; gap: 14px; }
-  .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: #fff; letter-spacing: -0.5px; }
-  .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-  .logo-sub { font-size: 12px; color: var(--muted); margin-top: 1px; font-family: 'DM Mono', monospace; }
-  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .last-update { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  
-  .period-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .period-bar label { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .period-bar select, .period-bar input { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-  .period-bar input[type=date] { font-family: 'DM Mono', monospace; font-size: 12px; }
-  .btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
-  .btn:hover { opacity: 0.85; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--border2); opacity: 1; background: var(--card); }
-
-  main { padding: 24px 32px 48px; max-width: 1400px; }
-  
-  .tabs { display: flex; gap: 2px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px; width: fit-content; }
-  .tab { padding: 7px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
-  .tab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-
-  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
-  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
-  .kpi-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .kpi-val { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; line-height: 1; }
-  .kpi-delta { font-size: 12px; margin-top: 6px; font-family: 'DM Mono', monospace; }
-  .delta-up { color: var(--green); } .delta-dn { color: var(--red); } .delta-neu { color: var(--muted); }
-
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 16px; }
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
-  .chart-card h3 { font-size: 13px; font-weight: 500; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-
-  .section-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; margin: 28px 0 14px; border-top: 1px solid var(--border); padding-top: 20px; }
-
-  .turma-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
-  .turma-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; transition: border-color 0.2s; cursor: pointer; }
-  .turma-card:hover { border-color: var(--border2); }
-  .turma-card.highlight { border-color: var(--accent); }
-  .tc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .tc-name { font-size: 12px; font-weight: 500; line-height: 1.4; flex: 1; padding-right: 10px; }
-  .tc-badge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
-  .badge-up { background: var(--green-dim); color: var(--green); }
-  .badge-dn { background: var(--red-dim); color: var(--red); }
-  .badge-neu { background: var(--subtle); color: var(--muted); }
-  .tc-meta { font-size: 11px; color: var(--muted); margin-bottom: 10px; font-family: 'DM Mono', monospace; }
-  .tc-chart-wrap { position: relative; height: 90px; }
-
-  .story-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 14px; }
-  .story-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-  .story-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-  .story-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
-
-  .filter-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-row select { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-  .search-input { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; width: 240px; }
-  .search-input::placeholder { color: var(--muted); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { padding: 10px 14px; text-align: left; font-weight: 500; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); background: var(--surface); }
-  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: 'DM Mono', monospace; font-weight: 500; }
-  .mini-bar { height: 5px; border-radius: 3px; background: var(--subtle); position: relative; width: 80px; display: inline-block; vertical-align: middle; }
-  .mini-fill { height: 5px; border-radius: 3px; position: absolute; left: 0; top: 0; }
-
-  @media (max-width: 900px) {
-    main, header, .period-bar { padding-left: 16px; padding-right: 16px; }
-    .kpi-row { grid-template-columns: repeat(2,1fr); }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .turma-grid { grid-template-columns: 1fr; }
-  }
+  :root{--bg:#0e0f11;--surface:#16181c;--card:#1c1f25;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0f0f0;--muted:#7a7f8a;--subtle:#3a3f4a;--green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);--red:#f87171;--red-dim:rgba(248,113,113,0.12);--blue:#60a5fa;--accent:#a78bfa;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+  header{padding:28px 32px 20px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo-mark{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#fff;}
+  .logo-text{font-size:18px;font-weight:600;letter-spacing:-0.3px;}
+  .logo-sub{font-size:12px;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace;}
+  .period-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .period-bar label{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+  .period-bar select,.period-bar input{background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+  .period-bar input[type=date]{font-family:'DM Mono',monospace;font-size:12px;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+  .btn-ghost:hover{color:var(--text);background:var(--card);}
+  main{padding:24px 32px 48px;max-width:1400px;}
+  .tabs{display:flex;gap:2px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content;}
+  .tab{padding:7px 18px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border:none;background:none;font-family:'DM Sans',sans-serif;}
+  .tab.active{background:var(--card);color:var(--text);}
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .kpi-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+  .kpi-val{font-size:26px;font-weight:600;letter-spacing:-0.5px;line-height:1;}
+  .kpi-delta{font-size:12px;margin-top:6px;font-family:'DM Mono',monospace;}
+  .delta-up{color:var(--green);}.delta-dn{color:var(--red);}.delta-neu{color:var(--muted);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
+  .chart-card h3{font-size:12px;font-weight:500;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px;}
+  .turma-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;}
+  .turma-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .turma-card:hover{border-color:var(--border2);}
+  .tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .tc-name{font-size:12px;font-weight:500;line-height:1.4;flex:1;padding-right:8px;}
+  .tc-badge{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .badge-up{background:var(--green-dim);color:var(--green);}
+  .badge-dn{background:var(--red-dim);color:var(--red);}
+  .badge-neu{background:var(--subtle);color:var(--muted);}
+  .tc-meta{font-size:11px;color:var(--muted);margin-bottom:8px;font-family:'DM Mono',monospace;}
+  .tc-chart-wrap{position:relative;height:110px;}
+  .story-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;}
+  .story-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+  .story-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .story-text{font-size:12px;color:var(--muted);line-height:1.6;}
+  .filter-row{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .filter-row select{background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+  .search-input{background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 12px;font-size:13px;font-family:'DM Sans',sans-serif;width:220px;}
+  .search-input::placeholder{color:var(--muted);}
+  .toggle-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);font-family:'DM Mono',monospace;}
+  .tog-green-on{background:var(--green-dim);color:var(--green);border-color:var(--green);}
+  .tog-red-on{background:var(--red-dim);color:var(--red);border-color:var(--red);}
+  .tog-off{background:transparent;color:var(--muted);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{padding:10px 14px;text-align:left;font-weight:500;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border);background:var(--surface);cursor:pointer;user-select:none;white-space:nowrap;}
+  th:hover{color:var(--text);}
+  th.sorted{color:var(--accent);}
+  td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+  .pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-family:'DM Mono',monospace;font-weight:500;}
+  .mini-bar{height:5px;border-radius:3px;background:var(--subtle);position:relative;width:80px;display:inline-block;vertical-align:middle;}
+  .mini-fill{height:5px;border-radius:3px;position:absolute;left:0;top:0;}
+  @media(max-width:900px){main,header,.period-bar{padding-left:16px;padding-right:16px;}.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}.turma-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-mark">FE</div>
-    <div>
-      <div class="logo-text">FORMAÊ Dashboard</div>
-      <div class="logo-sub">Adesômetro · Time FORMAÊ</div>
-    </div>
+    <div><div class="logo-text">FORMAÊ Dashboard</div><div class="logo-sub">Adesômetro · Time FORMAÊ</div></div>
   </div>
-  <div class="header-right">
-    <span class="last-update" id="last-update-label">Última atualização: 15/05/2026</span>
-  </div>
+  <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;">Última atualização: 15/05/2026</span>
 </header>
 
 <div class="period-bar">
@@ -125,7 +92,7 @@
   <button class="btn btn-ghost" onclick="applyPeriod()">Aplicar</button>
   <button class="btn btn-ghost" onclick="resetPeriod()">Todo período</button>
   <span style="flex:1"></span>
-  <span class="last-update" id="period-label" style="font-size:11px;"></span>
+  <span id="period-label" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;"></span>
 </div>
 
 <main>
@@ -135,31 +102,17 @@
     <button class="tab" onclick="switchTab('tabela',this)">Tabela Detalhada</button>
   </div>
 
-  <!-- TAB MACRO -->
   <div class="tab-content active" id="tab-macro">
     <div class="kpi-row" id="kpi-row"></div>
     <div id="stories"></div>
     <div class="grid-2">
-      <div class="chart-card">
-        <h3>Adesão total (Real vs PO)</h3>
-        <div style="position:relative;height:220px;"><canvas id="ch-macro-adesao"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Inadimplência acumulada (R$)</h3>
-        <div style="position:relative;height:220px;"><canvas id="ch-macro-inad"></canvas></div>
-      </div>
+      <div class="chart-card"><h3>Adesão total (Real vs PO)</h3><div style="position:relative;height:240px;"><canvas id="ch-adesao"></canvas></div></div>
+      <div class="chart-card"><h3>Inadimplência acumulada (R$)</h3><div style="position:relative;height:240px;"><canvas id="ch-inad"></canvas></div></div>
     </div>
-    <div class="chart-card" style="margin-bottom:16px;">
-      <h3>% adesão por consultor — evolução</h3>
-      <div style="position:relative;height:200px;"><canvas id="ch-cons"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Ranking de turmas — % adesão (último snapshot)</h3>
-      <div style="position:relative;" id="ch-ranking-wrap"><canvas id="ch-ranking"></canvas></div>
-    </div>
+    <div class="chart-card"><h3>% adesão média por consultor — evolução</h3><div style="position:relative;height:220px;"><canvas id="ch-cons"></canvas></div></div>
+    <div class="chart-card"><h3>Ranking de turmas — % adesão (último snapshot)</h3><div style="position:relative;" id="ranking-wrap"><canvas id="ch-ranking"></canvas></div></div>
   </div>
 
-  <!-- TAB CURVAS -->
   <div class="tab-content" id="tab-curvas">
     <div class="filter-row">
       <input class="search-input" type="text" placeholder="Buscar turma ou consultor..." id="search-turma" oninput="renderCurvas()"/>
@@ -171,11 +124,13 @@
         <option value="delta-asc">Maior queda</option>
         <option value="inad-desc">Maior inadimplência</option>
       </select>
+      <div style="width:1px;height:22px;background:var(--border2);"></div>
+      <button id="tog-adesao" class="toggle-btn tog-green-on" onclick="toggleLine('adesao')">● Adesão</button>
+      <button id="tog-inad" class="toggle-btn tog-red-on" onclick="toggleLine('inad')">● Inadimplência</button>
     </div>
     <div class="turma-grid" id="turma-grid"></div>
   </div>
 
-  <!-- TAB TABELA -->
   <div class="tab-content" id="tab-tabela">
     <div class="filter-row">
       <select id="snap-select" onchange="renderTabela()"><option value="last">Último snapshot</option></select>
@@ -183,13 +138,17 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>Turma</th><th>Consultor</th><th>PO</th>
-            <th>Real</th><th>% Adesão</th><th>Barra</th>
-            <th>Δ alunos</th><th>Δ %</th><th>Inadimplência</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th onclick="sortTable('turma')" id="th-turma">Turma <span id="arr-turma">↕</span></th>
+          <th onclick="sortTable('consultor')" id="th-consultor">Consultor <span id="arr-consultor">↕</span></th>
+          <th onclick="sortTable('po')" id="th-po">PO <span id="arr-po">↕</span></th>
+          <th onclick="sortTable('real')" id="th-real">Real <span id="arr-real">↕</span></th>
+          <th onclick="sortTable('pct')" id="th-pct">% Adesão <span id="arr-pct">↕</span></th>
+          <th>Barra</th>
+          <th onclick="sortTable('dr')" id="th-dr">Δ Alunos <span id="arr-dr">↕</span></th>
+          <th onclick="sortTable('dp')" id="th-dp">Δ % <span id="arr-dp">↕</span></th>
+          <th onclick="sortTable('inadimplencia')" id="th-inadimplencia">Inadimplência <span id="arr-inadimplencia">↕</span></th>
+        </tr></thead>
         <tbody id="tab-body"></tbody>
       </table>
     </div>
@@ -197,348 +156,203 @@
 </main>
 
 <script>
-const RAW_DATA = [{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - PSICOLOGIA FAMINAS  KAROLAYNE","consultor":"Layla Reis","po":30.0,"real":2.0,"pct":6.7,"inadimplencia":0},{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - BIOMEDICINA PUC PRAÇA FABRÍCIA","consultor":"Layla Reis","po":60.0,"real":10.0,"pct":16.7,"inadimplencia":1238.55},{"date":"2026-04-28","turma":"FORMAÊ- 2030.1 - ODONTOLOGIA NEWTON PAIVA PEDRO","consultor":"João Victor Pagani","po":30.0,"real":5.0,"pct":16.7,"inadimplencia":2914.81},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO","consultor":"Layla Reis","po":40.0,"real":7.0,"pct":17.5,"inadimplencia":174.92},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - ENFERMAGEM UFMG 148 GIOVANA","consultor":"Ana Trindade","po":40.0,"real":9.0,"pct":22.5,"inadimplencia":911.0},{"date":"2026-04-28","turma":"FORMAÊ- 2030.2 - MEDICINA VETERINÁRIA UNIBH OTAVIO","consultor":"Junior Sperancini","po":70.0,"real":16.0,"pct":22.9,"inadimplencia":2648.32},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - PSICOLOGIA ARNALDO MARIA FERNANDA","consultor":"Layla Reis","po":35.0,"real":9.0,"pct":25.7,"inadimplencia":264.61},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - DIREITO PUC BARREIRO LAVINIA","consultor":"Ana Trindade","po":40.0,"real":11.0,"pct":27.5,"inadimplencia":2525.48},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - MEDICINA VETERINÁRIA UNA PALOMA","consultor":"Layla Reis","po":25.0,"real":7.0,"pct":28.0,"inadimplencia":2434.67},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - NUTRIÇÃO PUC COREU LARISSA","consultor":"Layla Reis","po":35.0,"real":10.0,"pct":28.6,"inadimplencia":964.78},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA UFMG  VITÓRIA","consultor":"Junior Sperancini","po":40.0,"real":12.0,"pct":30.0,"inadimplencia":0},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - PSICOLOGIA PUC COREU RAFAELA","consultor":"Layla Reis","po":40.0,"real":12.0,"pct":30.0,"inadimplencia":317.64},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - BIOMEDICINA PUC CONTAGEM BIANCA","consultor":"Layla Reis","po":20.0,"real":7.0,"pct":35.0,"inadimplencia":884.81},{"date":"2026-04-28","turma":"FORMAÊ- 2027.1 - COMUNICAÇÃO UFMG JULIA","consultor":"Ana Trindade","po":40.0,"real":15.0,"pct":37.5,"inadimplencia":125.0},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS","consultor":"Layla Reis","po":40.0,"real":16.0,"pct":40.0,"inadimplencia":3431.77},{"date":"2026-04-28","turma":"FORMAÊ- 2027.2 - COMUNICAÇÃO PUC UNIFICADA LUCAS","consultor":"Pedro Braichi","po":25.0,"real":13.0,"pct":52.0,"inadimplencia":21526.21},{"date":"2026-04-28","turma":"FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA","consultor":"João Victor Pagani","po":45.0,"real":28.0,"pct":62.2,"inadimplencia":7131.59},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - ADMINISTRAÇÃO PÚBLICA FUNDAÇÃO JOÃO PINHEIRO LETÍCIA","consultor":"Ana Trindade","po":30.0,"real":20.0,"pct":66.7,"inadimplencia":3270.05},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - DIREITO UNIVERSO BARBARA","consultor":"Ana Trindade","po":40.0,"real":29.0,"pct":72.5,"inadimplencia":16752.73},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - ENFERMAGEM CIÊNCIAS MÉDICAS ISABELLA","consultor":"Ana Trindade","po":30.0,"real":26.0,"pct":86.7,"inadimplencia":4256.82},{"date":"2026-04-28","turma":"FORMAÊ- 2026.2 - ARQUITETURA E URBANISMO PUC UNIFICADA YASMIM","consultor":"Ana Trindade","po":60.0,"real":57.0,"pct":95.0,"inadimplencia":1487.95},{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - TECNOLOGIAS PUC UNIFICADA JULIA","consultor":"Junior Sperancini","po":null,"real":1.0,"pct":null,"inadimplencia":0},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - PSICOLOGIA FAMINAS  KAROLAYNE","consultor":"Layla Reis","po":30.0,"real":3.0,"pct":10.0,"inadimplencia":260.31},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - BIOMEDICINA PUC PRAÇA FABRÍCIA","consultor":"Layla Reis","po":60.0,"real":10.0,"pct":16.7,"inadimplencia":2877.49},{"date":"2026-05-15","turma":"FORMAÊ- 2030.1 - ODONTOLOGIA NEWTON PAIVA PEDRO","consultor":"João Victor Pagani","po":30.0,"real":5.0,"pct":16.7,"inadimplencia":3766.39},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO","consultor":"Layla Reis","po":40.0,"real":8.0,"pct":20.0,"inadimplencia":1105.17},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - ENFERMAGEM UFMG 148 GIOVANA","consultor":"Ana Trindade","po":40.0,"real":10.0,"pct":25.0,"inadimplencia":3137.99},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - PSICOLOGIA ARNALDO MARIA FERNANDA","consultor":"Layla Reis","po":35.0,"real":9.0,"pct":25.7,"inadimplencia":1471.68},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - NUTRIÇÃO PUC COREU LARISSA","consultor":"Layla Reis","po":35.0,"real":9.0,"pct":25.7,"inadimplencia":2051.38},{"date":"2026-05-15","turma":"FORMAÊ- 2030.2 - MEDICINA VETERINÁRIA UNIBH OTAVIO","consultor":"Junior Sperancini","po":70.0,"real":19.0,"pct":27.1,"inadimplencia":8035.23},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - DIREITO PUC BARREIRO LAVINIA","consultor":"Ana Trindade","po":40.0,"real":11.0,"pct":27.5,"inadimplencia":6167.92},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - MEDICINA VETERINÁRIA UNA PALOMA","consultor":"Layla Reis","po":25.0,"real":7.0,"pct":28.0,"inadimplencia":3070.87},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - PSICOLOGIA PUC COREU RAFAELA","consultor":"Layla Reis","po":40.0,"real":12.0,"pct":30.0,"inadimplencia":3410.36},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - BIOMEDICINA PUC CONTAGEM BIANCA","consultor":"Layla Reis","po":20.0,"real":7.0,"pct":35.0,"inadimplencia":889.74},{"date":"2026-05-15","turma":"FORMAÊ- 2027.1 - COMUNICAÇÃO UFMG JULIA","consultor":"Ana Trindade","po":40.0,"real":15.0,"pct":37.5,"inadimplencia":696.65},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS","consultor":"Layla Reis","po":40.0,"real":16.0,"pct":40.0,"inadimplencia":6264.91},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA UFMG  VITÓRIA","consultor":"Junior Sperancini","po":40.0,"real":19.0,"pct":47.5,"inadimplencia":2599.11},{"date":"2026-05-15","turma":"FORMAÊ- 2027.2 - COMUNICAÇÃO PUC UNIFICADA LUCAS","consultor":"Pedro Braichi","po":25.0,"real":13.0,"pct":52.0,"inadimplencia":25675.44},{"date":"2026-05-15","turma":"FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA","consultor":"João Victor Pagani","po":45.0,"real":28.0,"pct":62.2,"inadimplencia":9982.02},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - ADMINISTRAÇÃO PÚBLICA FUNDAÇÃO JOÃO PINHEIRO LETÍCIA","consultor":"Ana Trindade","po":30.0,"real":20.0,"pct":66.7,"inadimplencia":5723.94},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - DIREITO UNIVERSO BARBARA","consultor":"Ana Trindade","po":40.0,"real":29.0,"pct":72.5,"inadimplencia":21018.83},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - ENFERMAGEM CIÊNCIAS MÉDICAS ISABELLA","consultor":"Ana Trindade","po":30.0,"real":26.0,"pct":86.7,"inadimplencia":7371.0},{"date":"2026-05-15","turma":"FORMAÊ- 2026.2 - ARQUITETURA E URBANISMO PUC UNIFICADA YASMIM","consultor":"Ana Trindade","po":60.0,"real":58.0,"pct":96.7,"inadimplencia":2664.45},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - TECNOLOGIAS PUC UNIFICADA JULIA","consultor":"Junior Sperancini","po":null,"real":5.0,"pct":null,"inadimplencia":1014.42},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - ODONTOLOGIA NEWTON PAIVA AMANDA","consultor":"Layla Reis","po":null,"real":1.0,"pct":null,"inadimplencia":435.29}];
+Chart.register(ChartDataLabels);
 
-let allData = [...RAW_DATA];
-let filteredData = [...allData];
-let dateFrom = '2026-04-28', dateTo = '2026-05-15';
-const chartInstances = {};
+const RAW=[{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - PSICOLOGIA FAMINAS  KAROLAYNE","consultor":"Layla Reis","po":30,"real":2,"pct":6.7,"inadimplencia":0},{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - BIOMEDICINA PUC PRAÇA FABRÍCIA","consultor":"Layla Reis","po":60,"real":10,"pct":16.7,"inadimplencia":1238.55},{"date":"2026-04-28","turma":"FORMAÊ- 2030.1 - ODONTOLOGIA NEWTON PAIVA PEDRO","consultor":"João Victor Pagani","po":30,"real":5,"pct":16.7,"inadimplencia":2914.81},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO","consultor":"Layla Reis","po":40,"real":7,"pct":17.5,"inadimplencia":174.92},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - ENFERMAGEM UFMG 148 GIOVANA","consultor":"Ana Trindade","po":40,"real":9,"pct":22.5,"inadimplencia":911},{"date":"2026-04-28","turma":"FORMAÊ- 2030.2 - MEDICINA VETERINÁRIA UNIBH OTAVIO","consultor":"Junior Sperancini","po":70,"real":16,"pct":22.9,"inadimplencia":2648.32},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - PSICOLOGIA ARNALDO MARIA FERNANDA","consultor":"Layla Reis","po":35,"real":9,"pct":25.7,"inadimplencia":264.61},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - DIREITO PUC BARREIRO LAVINIA","consultor":"Ana Trindade","po":40,"real":11,"pct":27.5,"inadimplencia":2525.48},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - MEDICINA VETERINÁRIA UNA PALOMA","consultor":"Layla Reis","po":25,"real":7,"pct":28,"inadimplencia":2434.67},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - NUTRIÇÃO PUC COREU LARISSA","consultor":"Layla Reis","po":35,"real":10,"pct":28.6,"inadimplencia":964.78},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA UFMG  VITÓRIA","consultor":"Junior Sperancini","po":40,"real":12,"pct":30,"inadimplencia":0},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - PSICOLOGIA PUC COREU RAFAELA","consultor":"Layla Reis","po":40,"real":12,"pct":30,"inadimplencia":317.64},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - BIOMEDICINA PUC CONTAGEM BIANCA","consultor":"Layla Reis","po":20,"real":7,"pct":35,"inadimplencia":884.81},{"date":"2026-04-28","turma":"FORMAÊ- 2027.1 - COMUNICAÇÃO UFMG JULIA","consultor":"Ana Trindade","po":40,"real":15,"pct":37.5,"inadimplencia":125},{"date":"2026-04-28","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS","consultor":"Layla Reis","po":40,"real":16,"pct":40,"inadimplencia":3431.77},{"date":"2026-04-28","turma":"FORMAÊ- 2027.2 - COMUNICAÇÃO PUC UNIFICADA LUCAS","consultor":"Pedro Braichi","po":25,"real":13,"pct":52,"inadimplencia":21526.21},{"date":"2026-04-28","turma":"FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA","consultor":"João Victor Pagani","po":45,"real":28,"pct":62.2,"inadimplencia":7131.59},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - ADMINISTRAÇÃO PÚBLICA FUNDAÇÃO JOÃO PINHEIRO LETÍCIA","consultor":"Ana Trindade","po":30,"real":20,"pct":66.7,"inadimplencia":3270.05},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - DIREITO UNIVERSO BARBARA","consultor":"Ana Trindade","po":40,"real":29,"pct":72.5,"inadimplencia":16752.73},{"date":"2026-04-28","turma":"FORMAÊ- 2028.2 - ENFERMAGEM CIÊNCIAS MÉDICAS ISABELLA","consultor":"Ana Trindade","po":30,"real":26,"pct":86.7,"inadimplencia":4256.82},{"date":"2026-04-28","turma":"FORMAÊ- 2026.2 - ARQUITETURA E URBANISMO PUC UNIFICADA YASMIM","consultor":"Ana Trindade","po":60,"real":57,"pct":95,"inadimplencia":1487.95},{"date":"2026-04-28","turma":"FORMAÊ- 2029.1 - TECNOLOGIAS PUC UNIFICADA JULIA","consultor":"Junior Sperancini","po":null,"real":1,"pct":null,"inadimplencia":0},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - PSICOLOGIA FAMINAS  KAROLAYNE","consultor":"Layla Reis","po":30,"real":3,"pct":10,"inadimplencia":260.31},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - BIOMEDICINA PUC PRAÇA FABRÍCIA","consultor":"Layla Reis","po":60,"real":10,"pct":16.7,"inadimplencia":2877.49},{"date":"2026-05-15","turma":"FORMAÊ- 2030.1 - ODONTOLOGIA NEWTON PAIVA PEDRO","consultor":"João Victor Pagani","po":30,"real":5,"pct":16.7,"inadimplencia":3766.39},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO","consultor":"Layla Reis","po":40,"real":8,"pct":20,"inadimplencia":1105.17},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - ENFERMAGEM UFMG 148 GIOVANA","consultor":"Ana Trindade","po":40,"real":10,"pct":25,"inadimplencia":3137.99},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - PSICOLOGIA ARNALDO MARIA FERNANDA","consultor":"Layla Reis","po":35,"real":9,"pct":25.7,"inadimplencia":1471.68},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - NUTRIÇÃO PUC COREU LARISSA","consultor":"Layla Reis","po":35,"real":9,"pct":25.7,"inadimplencia":2051.38},{"date":"2026-05-15","turma":"FORMAÊ- 2030.2 - MEDICINA VETERINÁRIA UNIBH OTAVIO","consultor":"Junior Sperancini","po":70,"real":19,"pct":27.1,"inadimplencia":8035.23},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - DIREITO PUC BARREIRO LAVINIA","consultor":"Ana Trindade","po":40,"real":11,"pct":27.5,"inadimplencia":6167.92},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - MEDICINA VETERINÁRIA UNA PALOMA","consultor":"Layla Reis","po":25,"real":7,"pct":28,"inadimplencia":3070.87},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - PSICOLOGIA PUC COREU RAFAELA","consultor":"Layla Reis","po":40,"real":12,"pct":30,"inadimplencia":3410.36},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - BIOMEDICINA PUC CONTAGEM BIANCA","consultor":"Layla Reis","po":20,"real":7,"pct":35,"inadimplencia":889.74},{"date":"2026-05-15","turma":"FORMAÊ- 2027.1 - COMUNICAÇÃO UFMG JULIA","consultor":"Ana Trindade","po":40,"real":15,"pct":37.5,"inadimplencia":696.65},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS","consultor":"Layla Reis","po":40,"real":16,"pct":40,"inadimplencia":6264.91},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - FISIOTERAPIA UFMG  VITÓRIA","consultor":"Junior Sperancini","po":40,"real":19,"pct":47.5,"inadimplencia":2599.11},{"date":"2026-05-15","turma":"FORMAÊ- 2027.2 - COMUNICAÇÃO PUC UNIFICADA LUCAS","consultor":"Pedro Braichi","po":25,"real":13,"pct":52,"inadimplencia":25675.44},{"date":"2026-05-15","turma":"FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA","consultor":"João Victor Pagani","po":45,"real":28,"pct":62.2,"inadimplencia":9982.02},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - ADMINISTRAÇÃO PÚBLICA FUNDAÇÃO JOÃO PINHEIRO LETÍCIA","consultor":"Ana Trindade","po":30,"real":20,"pct":66.7,"inadimplencia":5723.94},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - DIREITO UNIVERSO BARBARA","consultor":"Ana Trindade","po":40,"real":29,"pct":72.5,"inadimplencia":21018.83},{"date":"2026-05-15","turma":"FORMAÊ- 2028.2 - ENFERMAGEM CIÊNCIAS MÉDICAS ISABELLA","consultor":"Ana Trindade","po":30,"real":26,"pct":86.7,"inadimplencia":7371},{"date":"2026-05-15","turma":"FORMAÊ- 2026.2 - ARQUITETURA E URBANISMO PUC UNIFICADA YASMIM","consultor":"Ana Trindade","po":60,"real":58,"pct":96.7,"inadimplencia":2664.45},{"date":"2026-05-15","turma":"FORMAÊ- 2029.1 - TECNOLOGIAS PUC UNIFICADA JULIA","consultor":"Junior Sperancini","po":null,"real":5,"pct":null,"inadimplencia":1014.42},{"date":"2026-05-15","turma":"FORMAÊ- 2029.2 - ODONTOLOGIA NEWTON PAIVA AMANDA","consultor":"Layla Reis","po":null,"real":1,"pct":null,"inadimplencia":435.29}];
 
-function shortName(t) {
-  return t.replace('FORMAÊ- ','').replace('FORMAÊ-','');
-}
-function fmtBRL(v) { return 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtDate(d) { const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+let allData=[...RAW],fd=[...allData],dateFrom='2026-04-28',dateTo='2026-05-15';
+let showA=true,showI=true,tblCol='pct',tblDir='desc';
+const CI={};
 
-function getFilteredData() {
-  return allData.filter(r => r.date >= dateFrom && r.date <= dateTo);
-}
+const sn=t=>t.replace('FORMAÊ- ','').replace('FORMAÊ-','');
+const brl=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+const fd2=d=>{const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+const getDates=()=>[...new Set(fd.map(r=>r.date))].sort();
+const getTurmas=()=>[...new Set(fd.map(r=>r.turma))].sort();
+const getCons=()=>[...new Set(fd.map(r=>r.consultor))].sort();
 
-function applyPeriod() {
-  dateFrom = document.getElementById('date-from').value;
-  dateTo = document.getElementById('date-to').value;
-  filteredData = getFilteredData();
-  renderAll();
-}
-function resetPeriod() {
-  const dates = [...new Set(allData.map(r=>r.date))].sort();
-  dateFrom = dates[0]; dateTo = dates[dates.length-1];
-  document.getElementById('date-from').value = dateFrom;
-  document.getElementById('date-to').value = dateTo;
-  filteredData = getFilteredData();
-  renderAll();
-}
+function applyPeriod(){dateFrom=document.getElementById('date-from').value;dateTo=document.getElementById('date-to').value;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);renderAll();}
+function resetPeriod(){const d=[...new Set(allData.map(r=>r.date))].sort();dateFrom=d[0];dateTo=d[d.length-1];document.getElementById('date-from').value=dateFrom;document.getElementById('date-to').value=dateTo;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);renderAll();}
 
-function getAllDates() { return [...new Set(filteredData.map(r=>r.date))].sort(); }
-function getAllTurmas() { return [...new Set(filteredData.map(r=>r.turma))].sort(); }
-function getAllConsultores() { return [...new Set(filteredData.map(r=>r.consultor))].sort(); }
+function snap(date){const s=fd.filter(r=>r.date===date);return{po:s.reduce((a,r)=>a+(r.po||0),0),real:s.reduce((a,r)=>a+r.real,0),inad:s.reduce((a,r)=>a+r.inadimplencia,0),pct:s.filter(r=>r.pct!=null).reduce((a,r,_,arr)=>a+r.pct/arr.length,0),n:s.length};}
 
-function getSnapshotTotals(date) {
-  const snap = filteredData.filter(r=>r.date===date);
-  const po = snap.reduce((s,r)=>s+(r.po||0),0);
-  const real = snap.reduce((s,r)=>s+(r.real||0),0);
-  const inad = snap.reduce((s,r)=>s+(r.inadimplencia||0),0);
-  const withPct = snap.filter(r=>r.pct!=null);
-  const pctAvg = withPct.length ? withPct.reduce((s,r)=>s+r.pct,0)/withPct.length : 0;
-  return {po,real,inad,pctAvg,count:snap.length};
+function renderKPIs(){
+  const dates=getDates();if(!dates.length)return;
+  const f=snap(dates[0]),l=snap(dates[dates.length-1]);
+  const dR=l.real-f.real,dP=(l.pct-f.pct).toFixed(1),dI=l.inad-f.inad,dN=l.n-f.n;
+  document.getElementById('kpi-row').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Turmas ativas</div><div class="kpi-val">${l.n}</div><div class="kpi-delta ${dN>0?'delta-up':dN<0?'delta-dn':'delta-neu'}">${dN>=0?'+':''}${dN} vs início</div></div>
+    <div class="kpi-card"><div class="kpi-label">PO total</div><div class="kpi-val">${l.po}</div><div class="kpi-delta delta-neu">vagas mapeadas</div></div>
+    <div class="kpi-card"><div class="kpi-label">Real (adesões)</div><div class="kpi-val">${l.real}</div><div class="kpi-delta ${dR>0?'delta-up':dR<0?'delta-dn':'delta-neu'}">${dR>=0?'+':''}${dR} no período</div></div>
+    <div class="kpi-card"><div class="kpi-label">% média adesão</div><div class="kpi-val">${l.pct.toFixed(1)}%</div><div class="kpi-delta ${dP>0?'delta-up':dP<0?'delta-dn':'delta-neu'}">${dP>=0?'+':''}${dP} pp</div></div>
+    <div class="kpi-card"><div class="kpi-label">Inadimplência</div><div class="kpi-val" style="font-size:19px;">${brl(l.inad)}</div><div class="kpi-delta ${dI>0?'delta-dn':dI<0?'delta-up':'delta-neu'}">${dI>=0?'+':''}${brl(dI)} no período</div></div>`;
 }
 
-function renderKPIs() {
-  const dates = getAllDates();
-  if (!dates.length) return;
-  const first = getSnapshotTotals(dates[0]);
-  const last = getSnapshotTotals(dates[dates.length-1]);
-  const deltaReal = last.real - first.real;
-  const deltaPct = (last.pctAvg - first.pctAvg).toFixed(1);
-  const deltaInad = last.inad - first.inad;
-  const deltaCount = last.count - first.count;
-
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi-card">
-      <div class="kpi-label">Turmas ativas</div>
-      <div class="kpi-val">${last.count}</div>
-      <div class="kpi-delta ${deltaCount>0?'delta-up':deltaCount<0?'delta-dn':'delta-neu'}">${deltaCount>=0?'+':''}${deltaCount} vs início</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">PO total</div>
-      <div class="kpi-val">${last.po.toFixed(0)}</div>
-      <div class="kpi-delta delta-neu">vagas mapeadas</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Real (adesões)</div>
-      <div class="kpi-val">${last.real.toFixed(0)}</div>
-      <div class="kpi-delta ${deltaReal>0?'delta-up':deltaReal<0?'delta-dn':'delta-neu'}">${deltaReal>=0?'+':''}${deltaReal} no período</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">% média adesão</div>
-      <div class="kpi-val">${last.pctAvg.toFixed(1)}%</div>
-      <div class="kpi-delta ${deltaPct>0?'delta-up':deltaPct<0?'delta-dn':'delta-neu'}">${deltaPct>=0?'+':''}${deltaPct} pp no período</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Inadimplência</div>
-      <div class="kpi-val" style="font-size:20px;">${fmtBRL(last.inad)}</div>
-      <div class="kpi-delta ${deltaInad>0?'delta-dn':deltaInad<0?'delta-up':'delta-neu'}">${deltaInad>=0?'+':''}${fmtBRL(deltaInad)} no período</div>
-    </div>`;
+function renderStories(){
+  const dates=getDates();if(dates.length<2){document.getElementById('stories').innerHTML='';return;}
+  const f=dates[0],l=dates[dates.length-1],sF=fd.filter(r=>r.date===f),sL=fd.filter(r=>r.date===l);
+  let stories=[];
+  let best=null,bD=-Infinity;
+  sL.forEach(r=>{const p=sF.find(x=>x.turma===r.turma);if(p&&r.pct!=null&&p.pct!=null){const d=r.pct-p.pct;if(d>bD){bD=d;best=r;}}});
+  if(best&&bD>0)stories.push({i:'🚀',t:`${sn(best.turma)} avançou +${bD.toFixed(1)} pp`,d:`De ${sF.find(p=>p.turma===best.turma)?.pct?.toFixed(1)}% para ${best.pct?.toFixed(1)}%. Consultor: ${best.consultor}.`});
+  const bi=[...sL].filter(r=>r.inadimplencia>5000).sort((a,b)=>b.inadimplencia-a.inadimplencia)[0];
+  if(bi)stories.push({i:'⚠️',t:`Atenção: ${sn(bi.turma)} com ${brl(bi.inadimplencia)} em inadimplência`,d:`Consultor ${bi.consultor} · ${bi.real} adesões de ${bi.po||'?'} · ${bi.pct?.toFixed(1)||'—'}%`});
+  const stag=sL.filter(r=>{const p=sF.find(x=>x.turma===r.turma);return p&&r.real===p.real&&r.pct!=null&&r.pct<35;});
+  if(stag.length)stories.push({i:'⏸️',t:`${stag.length} turma${stag.length>1?'s':''} sem evolução abaixo de 35%`,d:stag.map(r=>sn(r.turma).split(' ').slice(-2).join(' ')).join(', ')});
+  document.getElementById('stories').innerHTML=stories.map(s=>`<div class="story-bar"><div class="story-icon">${s.i}</div><div><div class="story-title">${s.t}</div><div class="story-text">${s.d}</div></div></div>`).join('');
 }
 
-function renderStories() {
-  const dates = getAllDates();
-  if (dates.length < 2) { document.getElementById('stories').innerHTML=''; return; }
-  const first = dates[0], last = dates[dates.length-1];
-  const snapFirst = filteredData.filter(r=>r.date===first);
-  const snapLast = filteredData.filter(r=>r.date===last);
+function dc(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
 
-  let stories = [];
-  // Best evolution
-  let best = null, bestDelta = -Infinity;
-  snapLast.forEach(r => {
-    const prev = snapFirst.find(p=>p.turma===r.turma);
-    if (prev && r.pct!=null && prev.pct!=null) {
-      const d = r.pct - prev.pct;
-      if (d > bestDelta) { bestDelta = d; best = r; }
-    }
-  });
-  if (best && bestDelta > 0) stories.push({icon:'🚀',title:`${shortName(best.turma)} avançou +${bestDelta.toFixed(1)} pp`,text:`De ${snapFirst.find(p=>p.turma===best.turma)?.pct?.toFixed(1)}% para ${best.pct?.toFixed(1)}% de adesão — maior evolução do período. Consultor: ${best.consultor}.`});
+function renderMacroCharts(){
+  const dates=getDates(),labels=dates.map(fd2);
 
-  // Inad alert
-  let bigInad = [...snapLast].filter(r=>r.inadimplencia>5000).sort((a,b)=>b.inadimplencia-a.inadimplencia)[0];
-  if (bigInad) stories.push({icon:'⚠️',title:`Atenção: ${shortName(bigInad.turma)} com ${fmtBRL(bigInad.inadimplencia)} em inadimplência`,text:`Consultor ${bigInad.consultor} · ${bigInad.real} adesões de ${bigInad.po||'?'} · ${bigInad.pct?.toFixed(1)||'—'}% de adesão.`});
-
-  // Stagnant
-  const stagnant = snapLast.filter(r=>{
-    const prev = snapFirst.find(p=>p.turma===r.turma);
-    return prev && r.real===prev.real && r.pct!=null && r.pct < 35;
-  });
-  if (stagnant.length) stories.push({icon:'⏸️',title:`${stagnant.length} turma${stagnant.length>1?'s':''} sem evolução com adesão abaixo de 35%`,text:`${stagnant.map(r=>shortName(r.turma).split(' ').slice(-2).join(' ')).join(', ')} — sem novos alunos desde ${fmtDate(first)}.`});
-
-  document.getElementById('stories').innerHTML = stories.map(s=>`
-    <div class="story-bar">
-      <div class="story-icon">${s.icon}</div>
-      <div><div class="story-title">${s.title}</div><div class="story-text">${s.text}</div></div>
-    </div>`).join('');
-}
-
-function destroyChart(id) { if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];} }
-
-function renderMacroCharts() {
-  const dates = getAllDates();
-  const labels = dates.map(fmtDate);
-
-  // Adesão macro
-  destroyChart('macro-adesao');
-  const totals = dates.map(d => {
-    const s = filteredData.filter(r=>r.date===d);
-    return { real: s.reduce((a,r)=>a+r.real,0), po: s.reduce((a,r)=>a+(r.po||0),0) };
-  });
-  chartInstances['macro-adesao'] = new Chart(document.getElementById('ch-macro-adesao'), {
-    type:'line',
+  // Adesão
+  dc('adesao');
+  const tots=dates.map(d=>{const s=fd.filter(r=>r.date===d);return{r:s.reduce((a,x)=>a+x.real,0),p:s.reduce((a,x)=>a+(x.po||0),0)};});
+  CI['adesao']=new Chart(document.getElementById('ch-adesao'),{type:'line',
     data:{labels,datasets:[
-      {label:'Real',data:totals.map(t=>t.real),borderColor:'#3ecf8e',backgroundColor:'rgba(62,207,142,0.08)',tension:0.3,fill:true,pointRadius:5,pointBackgroundColor:'#3ecf8e'},
-      {label:'PO',data:totals.map(t=>t.po),borderColor:'rgba(255,255,255,0.2)',borderDash:[4,4],tension:0,fill:false,pointRadius:0}
+      {label:'Real',data:tots.map(t=>t.r),borderColor:'#3ecf8e',backgroundColor:'rgba(62,207,142,0.08)',tension:0.3,fill:true,pointRadius:6,pointBackgroundColor:'#3ecf8e',
+        datalabels:{color:'#3ecf8e',anchor:'end',align:'top',offset:6,font:{size:12,weight:'500',family:"'DM Mono',monospace"},formatter:v=>v}},
+      {label:'PO',data:tots.map(t=>t.p),borderColor:'rgba(255,255,255,0.2)',borderDash:[4,4],tension:0,fill:false,pointRadius:4,pointBackgroundColor:'rgba(255,255,255,0.3)',
+        datalabels:{color:'rgba(255,255,255,0.4)',anchor:'start',align:'bottom',offset:6,font:{size:11,family:"'DM Mono',monospace"},formatter:v=>v}}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}}}}
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:32,right:10}},
+      plugins:{legend:{display:true,labels:{color:'#7a7f8a',boxWidth:10,padding:12,font:{size:12}}},datalabels:{clip:false}},
+      scales:{x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}}}}
   });
 
-  // Inadimplência macro
-  destroyChart('macro-inad');
-  chartInstances['macro-inad'] = new Chart(document.getElementById('ch-macro-inad'), {
-    type:'line',
-    data:{labels,datasets:[{
-      label:'Inadimplência',data:dates.map(d=>filteredData.filter(r=>r.date===d).reduce((a,r)=>a+r.inadimplencia,0)),
-      borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.08)',tension:0.3,fill:true,pointRadius:5,pointBackgroundColor:'#f87171'
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-      x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},
-      y:{ticks:{color:'#7a7f8a',callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,0.05)'}}
-    }}
+  // Inadimplência
+  dc('inad');
+  const inadV=dates.map(d=>fd.filter(r=>r.date===d).reduce((a,r)=>a+r.inadimplencia,0));
+  CI['inad']=new Chart(document.getElementById('ch-inad'),{type:'line',
+    data:{labels,datasets:[{label:'Inadimplência',data:inadV,borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.08)',tension:0.3,fill:true,pointRadius:6,pointBackgroundColor:'#f87171',
+      datalabels:{color:'#f87171',anchor:'end',align:'top',offset:6,font:{size:12,weight:'500',family:"'DM Mono',monospace"},formatter:v=>'R$'+Math.round(v/1000)+'k'}}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:32,right:10}},
+      plugins:{legend:{display:false},datalabels:{clip:false}},
+      scales:{x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#7a7f8a',callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,0.05)'}}}}
   });
 
   // Consultores
-  destroyChart('cons');
-  const consultores = getAllConsultores();
-  const CONS_COLORS = ['#a78bfa','#3ecf8e','#60a5fa','#fbbf24','#f87171'];
-  const consDatasets = consultores.map((c,i) => ({
-    label: c.split(' ')[0],
-    data: dates.map(d => {
-      const rows = filteredData.filter(r=>r.date===d&&r.consultor===c&&r.pct!=null);
-      return rows.length ? +(rows.reduce((a,r)=>a+r.pct,0)/rows.length).toFixed(1) : null;
-    }),
-    borderColor: CONS_COLORS[i%CONS_COLORS.length],
-    backgroundColor: 'transparent',
-    tension: 0.3, pointRadius: 5, spanGaps: true,
-    pointBackgroundColor: CONS_COLORS[i%CONS_COLORS.length]
-  }));
-  chartInstances['cons'] = new Chart(document.getElementById('ch-cons'), {
-    type:'line',
-    data:{labels,datasets:consDatasets},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#7a7f8a',boxWidth:10,padding:16,font:{size:12}}}},scales:{
-      x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},
-      y:{ticks:{color:'#7a7f8a',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'},max:110}
-    }}
+  dc('cons');
+  const cons=getCons(),COLS=['#a78bfa','#3ecf8e','#60a5fa','#fbbf24','#f87171'];
+  CI['cons']=new Chart(document.getElementById('ch-cons'),{type:'line',
+    data:{labels,datasets:cons.map((c,i)=>({
+      label:c.split(' ')[0],
+      data:dates.map(d=>{const rows=fd.filter(r=>r.date===d&&r.consultor===c&&r.pct!=null);return rows.length?+(rows.reduce((a,r)=>a+r.pct,0)/rows.length).toFixed(1):null;}),
+      borderColor:COLS[i%COLS.length],backgroundColor:'transparent',tension:0.3,pointRadius:6,spanGaps:true,pointBackgroundColor:COLS[i%COLS.length],
+      datalabels:{color:COLS[i%COLS.length],anchor:'end',align:'top',offset:6,font:{size:11,weight:'500',family:"'DM Mono',monospace"},formatter:v=>v==null?'':v.toFixed(1)+'%'}
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:32,right:10}},interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,labels:{color:'#7a7f8a',boxWidth:10,padding:16,font:{size:12}}},datalabels:{clip:false}},
+      scales:{x:{ticks:{color:'#7a7f8a'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#7a7f8a',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'},max:115}}}
   });
 
   // Ranking
-  destroyChart('ranking');
-  const lastDate = dates[dates.length-1];
-  const lastSnap = filteredData.filter(r=>r.date===lastDate&&r.pct!=null).sort((a,b)=>b.pct-a.pct);
-  const rWrap = document.getElementById('ch-ranking-wrap');
-  rWrap.style.height = Math.max(200, lastSnap.length*32+40)+'px';
-  chartInstances['ranking'] = new Chart(document.getElementById('ch-ranking'), {
-    type:'bar',
-    data:{
-      labels:lastSnap.map(r=>shortName(r.turma).slice(0,42)),
-      datasets:[{
-        label:'% Adesão',
-        data:lastSnap.map(r=>r.pct),
-        backgroundColor:lastSnap.map(r=>r.pct>=60?'rgba(62,207,142,0.7)':r.pct>=30?'rgba(96,165,250,0.7)':'rgba(248,113,113,0.7)'),
-        borderRadius:3
-      }]
-    },
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x.toFixed(1)}% — Real: ${lastSnap[ctx.dataIndex].real}/${lastSnap[ctx.dataIndex].po||'?'}`}}},scales:{
-      x:{ticks:{color:'#7a7f8a',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'},max:110},
-      y:{ticks:{color:'#7a7f8a',font:{size:11}},grid:{display:false}}
-    }}
+  dc('ranking');
+  const ld=dates[dates.length-1],ls=fd.filter(r=>r.date===ld&&r.pct!=null).sort((a,b)=>b.pct-a.pct);
+  document.getElementById('ranking-wrap').style.height=Math.max(200,ls.length*34+60)+'px';
+  CI['ranking']=new Chart(document.getElementById('ch-ranking'),{type:'bar',
+    data:{labels:ls.map(r=>sn(r.turma).slice(0,44)),datasets:[{
+      label:'%',data:ls.map(r=>r.pct),
+      backgroundColor:ls.map(r=>r.pct>=60?'rgba(62,207,142,0.7)':r.pct>=30?'rgba(96,165,250,0.7)':'rgba(248,113,113,0.7)'),borderRadius:3,
+      datalabels:{color:'#f0f0f0',anchor:'end',align:'right',offset:6,font:{size:11,weight:'500',family:"'DM Mono',monospace"},
+        formatter:(v,ctx)=>`${v.toFixed(1)}%  ${ls[ctx.dataIndex].real}/${ls[ctx.dataIndex].po||'?'} alunos`}
+    }]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:130}},
+      plugins:{legend:{display:false},datalabels:{clip:false}},
+      scales:{x:{ticks:{color:'#7a7f8a',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'},max:130},y:{ticks:{color:'#7a7f8a',font:{size:11}},grid:{display:false}}}}
   });
 }
 
-function renderCurvas() {
-  const search = document.getElementById('search-turma').value.toLowerCase();
-  const consFilter = document.getElementById('filter-cons').value;
-  const sort = document.getElementById('sort-turmas').value;
-  const dates = getAllDates();
-  const lastDate = dates[dates.length-1];
-  const firstDate = dates[0];
+function toggleLine(which){
+  if(which==='adesao'){showA=!showA;document.getElementById('tog-adesao').className='toggle-btn '+(showA?'tog-green-on':'tog-off');}
+  else{showI=!showI;document.getElementById('tog-inad').className='toggle-btn '+(showI?'tog-red-on':'tog-off');}
+  Object.keys(CI).filter(k=>k.startsWith('card-')).forEach(k=>{if(CI[k]){CI[k].data.datasets[0].hidden=!showA;CI[k].data.datasets[1].hidden=!showI;CI[k].update();}});
+}
 
-  let turmas = getAllTurmas();
-  if (consFilter) turmas = turmas.filter(t => { const r = filteredData.find(d=>d.turma===t); return r&&r.consultor===consFilter; });
-  if (search) turmas = turmas.filter(t => t.toLowerCase().includes(search) || (filteredData.find(d=>d.turma===t)?.consultor||'').toLowerCase().includes(search));
+function renderCurvas(){
+  const search=document.getElementById('search-turma').value.toLowerCase();
+  const cf=document.getElementById('filter-cons').value;
+  const sort=document.getElementById('sort-turmas').value;
+  const dates=getDates(),ld=dates[dates.length-1],fd1=dates[0];
+  let turmas=getTurmas();
+  if(cf)turmas=turmas.filter(t=>{const r=fd.find(d=>d.turma===t);return r&&r.consultor===cf;});
+  if(search)turmas=turmas.filter(t=>t.toLowerCase().includes(search)||(fd.find(d=>d.turma===t)?.consultor||'').toLowerCase().includes(search));
+  const gLP=t=>fd.filter(r=>r.turma===t&&r.pct!=null).slice(-1)[0]?.pct??0;
+  const gD=t=>{const f=fd.filter(r=>r.turma===t&&r.date===fd1)[0],l=fd.filter(r=>r.turma===t&&r.date===ld)[0];if(!f||!l||f.pct==null||l.pct==null)return 0;return l.pct-f.pct;};
+  const gI=t=>fd.filter(r=>r.turma===t).slice(-1)[0]?.inadimplencia??0;
+  if(sort==='pct-desc')turmas.sort((a,b)=>gLP(b)-gLP(a));
+  else if(sort==='pct-asc')turmas.sort((a,b)=>gLP(a)-gLP(b));
+  else if(sort==='delta-desc')turmas.sort((a,b)=>gD(b)-gD(a));
+  else if(sort==='delta-asc')turmas.sort((a,b)=>gD(a)-gD(b));
+  else if(sort==='inad-desc')turmas.sort((a,b)=>gI(b)-gI(a));
 
-  const getLastPct = t => filteredData.filter(r=>r.turma===t&&r.pct!=null).slice(-1)[0]?.pct??0;
-  const getDelta = t => {
-    const first = filteredData.filter(r=>r.turma===t&&r.date===firstDate)[0];
-    const last = filteredData.filter(r=>r.turma===t&&r.date===lastDate)[0];
-    if (!first||!last||first.pct==null||last.pct==null) return 0;
-    return last.pct - first.pct;
-  };
-  const getLastInad = t => filteredData.filter(r=>r.turma===t).slice(-1)[0]?.inadimplencia??0;
+  Object.keys(CI).filter(k=>k.startsWith('card-')).forEach(k=>{CI[k].destroy();delete CI[k];});
+  const grid=document.getElementById('turma-grid');grid.innerHTML='';
 
-  if (sort==='pct-desc') turmas.sort((a,b)=>getLastPct(b)-getLastPct(a));
-  else if (sort==='pct-asc') turmas.sort((a,b)=>getLastPct(a)-getLastPct(b));
-  else if (sort==='delta-desc') turmas.sort((a,b)=>getDelta(b)-getDelta(a));
-  else if (sort==='delta-asc') turmas.sort((a,b)=>getDelta(a)-getDelta(b));
-  else if (sort==='inad-desc') turmas.sort((a,b)=>getLastInad(b)-getLastInad(a));
-
-  const grid = document.getElementById('turma-grid');
-  grid.innerHTML = '';
-
-  turmas.forEach(turma => {
-    const rows = filteredData.filter(r=>r.turma===turma).sort((a,b)=>a.date.localeCompare(b.date));
-    if (!rows.length) return;
-    const last = rows[rows.length-1];
-    const first = rows[0];
-    const deltaReal = last.real - first.real;
-    const deltaPct = last.pct!=null&&first.pct!=null ? (last.pct-first.pct).toFixed(1) : null;
-    const badgeClass = deltaReal>0?'badge-up':deltaReal<0?'badge-dn':'badge-neu';
-    const badgeText = deltaReal>0?`+${deltaReal} alunos`:deltaReal<0?`${deltaReal} alunos`:'sem evolução';
-    const cardId = 'card-'+turma.replace(/[^a-zA-Z0-9]/g,'_');
-
-    const div = document.createElement('div');
-    div.className = 'turma-card';
-    div.innerHTML = `
-      <div class="tc-header">
-        <div class="tc-name">${shortName(turma)}</div>
-        <span class="tc-badge ${badgeClass}">${badgeText}</span>
-      </div>
-      <div class="tc-meta">${last.consultor} · PO: ${last.po??'—'} · Real: ${last.real} · ${last.pct!=null?last.pct.toFixed(1)+'%':'s/ %'}${deltaPct!==null?` · Δ${deltaPct>=0?'+':''}${deltaPct} pp`:''}</div>
-      <div class="tc-chart-wrap"><canvas id="${cardId}"></canvas></div>`;
+  turmas.forEach(turma=>{
+    const rows=fd.filter(r=>r.turma===turma).sort((a,b)=>a.date.localeCompare(b.date));
+    if(!rows.length)return;
+    const last=rows[rows.length-1],first=rows[0];
+    const dR=last.real-first.real,dP=last.pct!=null&&first.pct!=null?(last.pct-first.pct).toFixed(1):null;
+    const bC=dR>0?'badge-up':dR<0?'badge-dn':'badge-neu',bT=dR>0?`+${dR} alunos`:dR<0?`${dR} alunos`:'sem evolução';
+    const cid='card-'+turma.replace(/[^a-zA-Z0-9]/g,'_');
+    const div=document.createElement('div');div.className='turma-card';
+    div.innerHTML=`<div class="tc-header"><div class="tc-name">${sn(turma)}</div><span class="tc-badge ${bC}">${bT}</span></div><div class="tc-meta">${last.consultor} · PO: ${last.po??'—'} · Real: ${last.real} · ${last.pct!=null?last.pct.toFixed(1)+'%':'s/ %'}${dP!==null?` · Δ${dP>=0?'+':''}${dP} pp`:''}</div><div class="tc-chart-wrap"><canvas id="${cid}"></canvas></div>`;
     grid.appendChild(div);
-
-    setTimeout(() => {
-      const canvas = document.getElementById(cardId);
-      if (!canvas) return;
-      if (chartInstances[cardId]) chartInstances[cardId].destroy();
-      const dlabels = rows.map(r=>fmtDate(r.date));
-      chartInstances[cardId] = new Chart(canvas, {
-        type:'line',
-        data:{labels:dlabels,datasets:[
-          {label:'% Adesão',data:rows.map(r=>r.pct),borderColor:'#3ecf8e',backgroundColor:'rgba(62,207,142,0.08)',tension:0.3,fill:true,pointRadius:4,pointBackgroundColor:'#3ecf8e',yAxisID:'y'},
-          {label:'Inadimplência',data:rows.map(r=>r.inadimplencia),borderColor:'#f87171',backgroundColor:'transparent',tension:0.3,fill:false,pointRadius:4,pointBackgroundColor:'#f87171',yAxisID:'y2',borderDash:[3,3]}
+    setTimeout(()=>{
+      const canvas=document.getElementById(cid);if(!canvas)return;
+      CI[cid]=new Chart(canvas,{type:'line',
+        data:{labels:rows.map(r=>fd2(r.date)),datasets:[
+          {label:'% Adesão',data:rows.map(r=>r.pct),borderColor:'#3ecf8e',backgroundColor:'rgba(62,207,142,0.08)',tension:0.3,fill:true,pointRadius:5,pointBackgroundColor:'#3ecf8e',hidden:!showA,yAxisID:'y',
+            datalabels:{display:true,color:'#3ecf8e',anchor:'end',align:'top',offset:4,font:{size:10,weight:'500',family:"'DM Mono',monospace"},formatter:v=>v==null?'':v.toFixed(1)+'%'}},
+          {label:'Inadimplência',data:rows.map(r=>r.inadimplencia),borderColor:'#f87171',backgroundColor:'transparent',tension:0.3,fill:false,pointRadius:5,pointBackgroundColor:'#f87171',hidden:!showI,yAxisID:'y2',borderDash:[3,3],
+            datalabels:{display:true,color:'#f87171',anchor:'start',align:'bottom',offset:4,font:{size:10,weight:'500',family:"'DM Mono',monospace"},formatter:v=>v==null||v===0?'':'R$'+Math.round(v/1000)+'k'}}
         ]},
-        options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#7a7f8a',boxWidth:8,padding:10,font:{size:10}}}},scales:{
-          x:{ticks:{color:'#7a7f8a',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
-          y:{ticks:{color:'#3ecf8e',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'},position:'left'},
-          y2:{ticks:{color:'#f87171',font:{size:10},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{display:false},position:'right'}
-        }}
+        options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:22,bottom:18}},
+          plugins:{legend:{display:true,labels:{color:'#7a7f8a',boxWidth:8,padding:10,font:{size:10}}},datalabels:{clip:false}},
+          scales:{x:{ticks:{color:'#7a7f8a',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
+            y:{ticks:{color:'#3ecf8e',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'},position:'left'},
+            y2:{ticks:{color:'#f87171',font:{size:10},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{display:false},position:'right'}}}
       });
-    }, 0);
+    },0);
   });
 }
 
-function renderTabela() {
-  const snap = document.getElementById('snap-select').value;
-  const consFilter = document.getElementById('filter-cons-tab').value;
-  const dates = getAllDates();
-  const lastDate = dates[dates.length-1];
-  const firstDate = dates[0];
-  const targetDate = snap==='last' ? lastDate : snap;
+function sortTable(col){if(tblCol===col)tblDir=tblDir==='desc'?'asc':'desc';else{tblCol=col;tblDir='desc';}renderTabela();}
 
-  let rows = filteredData.filter(r=>r.date===targetDate);
-  if (consFilter) rows = rows.filter(r=>r.consultor===consFilter);
-  rows.sort((a,b)=>(b.pct??-1)-(a.pct??-1));
-
-  const tbody = document.getElementById('tab-body');
-  tbody.innerHTML = rows.map(r => {
-    const prev = filteredData.find(p=>p.turma===r.turma&&p.date===firstDate);
-    const dr = prev ? r.real - prev.real : null;
-    const dp = prev&&r.pct!=null&&prev.pct!=null ? (r.pct-prev.pct).toFixed(1) : null;
-    const pct = r.pct??0;
-    const fillColor = pct>=60?'#3ecf8e':pct>=30?'#60a5fa':'#f87171';
-    const drBadge = dr==null?'—':dr>0?`<span class="pill badge-up">+${dr}</span>`:dr<0?`<span class="pill badge-dn">${dr}</span>`:`<span class="pill" style="background:var(--subtle);color:var(--muted)">—</span>`;
-    const dpBadge = dp==null?'—':dp>0?`<span class="pill badge-up">+${dp} pp</span>`:dp<0?`<span class="pill badge-dn">${dp} pp</span>`:`<span class="pill" style="background:var(--subtle);color:var(--muted)">—</span>`;
-    return `<tr>
-      <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${shortName(r.turma)}</td>
-      <td style="color:var(--muted)">${r.consultor}</td>
-      <td style="color:var(--muted)">${r.po??'—'}</td>
-      <td>${r.real}</td>
-      <td>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td>
-      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(pct,100)}%;background:${fillColor}"></div></div></td>
-      <td>${drBadge}</td>
-      <td>${dpBadge}</td>
-      <td style="color:${r.inadimplencia>5000?'#f87171':'var(--muted)'}">${fmtBRL(r.inadimplencia)}</td>
-    </tr>`;
+function renderTabela(){
+  const snap=document.getElementById('snap-select').value,cf=document.getElementById('filter-cons-tab').value;
+  const dates=getDates(),ld=dates[dates.length-1],fd1=dates[0],td=snap==='last'?ld:snap;
+  let rows=fd.filter(r=>r.date===td);
+  if(cf)rows=rows.filter(r=>r.consultor===cf);
+  rows=rows.map(r=>{const p=fd.find(x=>x.turma===r.turma&&x.date===fd1);return{...r,dr:p?r.real-p.real:null,dp:p&&r.pct!=null&&p.pct!=null?+(r.pct-p.pct).toFixed(1):null};});
+  rows.sort((a,b)=>{
+    if(tblCol==='turma'||tblCol==='consultor'){return tblDir==='asc'?a[tblCol].localeCompare(b[tblCol]):b[tblCol].localeCompare(a[tblCol]);}
+    const va=a[tblCol]??-Infinity,vb=b[tblCol]??-Infinity;return tblDir==='asc'?va-vb:vb-va;
+  });
+  ['turma','consultor','po','real','pct','dr','dp','inadimplencia'].forEach(c=>{
+    const th=document.getElementById('th-'+c),arr=document.getElementById('arr-'+c);
+    if(th&&arr){th.classList.toggle('sorted',tblCol===c);arr.textContent=tblCol===c?(tblDir==='desc'?'↓':'↑'):'↕';}
+  });
+  document.getElementById('tab-body').innerHTML=rows.map(r=>{
+    const pct=r.pct??0,fc=pct>=60?'#3ecf8e':pct>=30?'#60a5fa':'#f87171';
+    const drB=r.dr==null?'—':r.dr>0?`<span class="pill badge-up">+${r.dr}</span>`:r.dr<0?`<span class="pill badge-dn">${r.dr}</span>`:`<span class="pill" style="background:var(--subtle);color:var(--muted)">—</span>`;
+    const dpB=r.dp==null?'—':r.dp>0?`<span class="pill badge-up">+${r.dp} pp</span>`:r.dp<0?`<span class="pill badge-dn">${r.dp} pp</span>`:`<span class="pill" style="background:var(--subtle);color:var(--muted)">—</span>`;
+    return`<tr><td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sn(r.turma)}</td><td style="color:var(--muted)">${r.consultor}</td><td style="color:var(--muted)">${r.po??'—'}</td><td>${r.real}</td><td>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td><td><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(pct,100)}%;background:${fc}"></div></div></td><td>${drB}</td><td>${dpB}</td><td style="color:${r.inadimplencia>5000?'#f87171':'var(--muted)'}">${brl(r.inadimplencia)}</td></tr>`;
   }).join('');
 }
 
-function populateFilters() {
-  const consultores = getAllConsultores();
-  ['filter-cons','filter-cons-tab'].forEach(id => {
-    const el = document.getElementById(id);
-    const cur = el.value;
-    el.innerHTML = '<option value="">Todos consultores</option>' + consultores.map(c=>`<option value="${c}">${c}</option>`).join('');
-    el.value = cur;
-  });
-  const dates = getAllDates();
-  const sel = document.getElementById('snap-select');
-  sel.innerHTML = '<option value="last">Último snapshot</option>' + dates.map(d=>`<option value="${d}">${fmtDate(d)}</option>`).join('');
+function populateFilters(){
+  const cons=getCons();
+  ['filter-cons','filter-cons-tab'].forEach(id=>{const el=document.getElementById(id),cur=el.value;el.innerHTML='<option value="">Todos consultores</option>'+cons.map(c=>`<option value="${c}">${c}</option>`).join('');el.value=cur;});
+  const dates=getDates(),sel=document.getElementById('snap-select');
+  sel.innerHTML='<option value="last">Último snapshot</option>'+dates.map(d=>`<option value="${d}">${fd2(d)}</option>`).join('');
 }
 
-function renderAll() {
-  filteredData = getFilteredData();
-  document.getElementById('period-label').textContent = `${fmtDate(dateFrom)} → ${fmtDate(dateTo)}`;
-  populateFilters();
-  renderKPIs();
-  renderStories();
-  renderMacroCharts();
-  renderCurvas();
-  renderTabela();
-}
-
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  btn.classList.add('active');
-}
+function renderAll(){fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);document.getElementById('period-label').textContent=`${fd2(dateFrom)} → ${fd2(dateTo)}`;populateFilters();renderKPIs();renderStories();renderMacroCharts();renderCurvas();renderTabela();}
+function switchTab(name,btn){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');}
 
 renderAll();
 </script>

@@ -341,7 +341,7 @@
     "dataDisplay": "18/05/2026",
     "totalPO": 815,
     "totalReal": 343,
-    "totalInad": 0,
+    "totalInad": 114861.26599999999,
     "percGeral": 42.1,
     "numTurmas": 23,
     "turmas": [
@@ -350,161 +350,161 @@
         "po": 30,
         "real": 3,
         "perc": 10.0,
-        "inadimplencia": 0
+        "inadimplencia": 260.31
       },
       {
         "turma": "FORMAÊ- 2029.1 - BIOMEDICINA PUC PRAÇA FABRÍCIA",
         "po": 60,
         "real": 10,
         "perc": 16.7,
-        "inadimplencia": 0
+        "inadimplencia": 2877.49
       },
       {
         "turma": "FORMAÊ- 2030.1 - ODONTOLOGIA NEWTON PAIVA PEDRO",
         "po": 30,
         "real": 5,
         "perc": 16.7,
-        "inadimplencia": 0
+        "inadimplencia": 3766.39
       },
       {
         "turma": "FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO",
         "po": 40,
         "real": 8,
         "perc": 20.0,
-        "inadimplencia": 0
+        "inadimplencia": 1105.17
       },
       {
         "turma": "FORMAÊ- 2029.2 - ENFERMAGEM UFMG 148 GIOVANA",
         "po": 40,
         "real": 10,
         "perc": 25.0,
-        "inadimplencia": 0
+        "inadimplencia": 2838.12
       },
       {
         "turma": "FORMAÊ- 2028.2 - PSICOLOGIA ARNALDO MARIA FERNANDA",
         "po": 35,
         "real": 9,
         "perc": 25.7,
-        "inadimplencia": 0
+        "inadimplencia": 1471.68
       },
       {
         "turma": "FORMAÊ- 2028.2 - NUTRIÇÃO PUC COREU LARISSA",
         "po": 35,
         "real": 9,
         "perc": 25.7,
-        "inadimplencia": 0
+        "inadimplencia": 2051.38
       },
       {
         "turma": "FORMAÊ- 2030.2 - MEDICINA VETERINÁRIA UNIBH OTAVIO",
         "po": 70,
         "real": 19,
         "perc": 27.1,
-        "inadimplencia": 0
+        "inadimplencia": 7524.2
       },
       {
         "turma": "FORMAÊ- 2028.2 - DIREITO PUC BARREIRO LAVINIA",
         "po": 40,
         "real": 11,
         "perc": 27.5,
-        "inadimplencia": 0
+        "inadimplencia": 5742.91
       },
       {
         "turma": "FORMAÊ- 2029.2 - MEDICINA VETERINÁRIA UNA PALOMA",
         "po": 25,
         "real": 7,
         "perc": 28.0,
-        "inadimplencia": 0
+        "inadimplencia": 3070.87
       },
       {
         "turma": "FORMAÊ- 2029.2 - PSICOLOGIA PUC COREU RAFAELA",
         "po": 40,
         "real": 12,
         "perc": 30.0,
-        "inadimplencia": 0
+        "inadimplencia": 3410.36
       },
       {
         "turma": "FORMAÊ- 2028.2 - BIOMEDICINA PUC CONTAGEM BIANCA",
         "po": 20,
         "real": 7,
         "perc": 35.0,
-        "inadimplencia": 0
+        "inadimplencia": 486.87
       },
       {
         "turma": "FORMAÊ- 2027.1 - COMUNICAÇÃO UFMG JULIA",
         "po": 40,
         "real": 15,
         "perc": 37.5,
-        "inadimplencia": 0
+        "inadimplencia": 416.65
       },
       {
         "turma": "FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS",
         "po": 40,
         "real": 16,
         "perc": 40.0,
-        "inadimplencia": 0
+        "inadimplencia": 6264.91
       },
       {
         "turma": "FORMAÊ- 2027.2 - COMUNICAÇÃO PUC UNIFICADA LUCAS",
         "po": 25,
         "real": 13,
         "perc": 52.0,
-        "inadimplencia": 0
+        "inadimplencia": 25374.54
       },
       {
         "turma": "FORMAÊ- 2029.2 - FISIOTERAPIA UFMG  VITÓRIA",
         "po": 40,
         "real": 22,
         "perc": 55.0,
-        "inadimplencia": 0
+        "inadimplencia": 2532.79
       },
       {
         "turma": "FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA",
         "po": 45,
         "real": 28,
         "perc": 62.2,
-        "inadimplencia": 0
+        "inadimplencia": 9041.14
       },
       {
         "turma": "FORMAÊ- 2028.2 - ADMINISTRAÇÃO PÚBLICA FUNDAÇÃO JOÃO PINHEIRO LETÍCIA",
         "po": 30,
         "real": 20,
         "perc": 66.7,
-        "inadimplencia": 0
+        "inadimplencia": 5026.58
       },
       {
         "turma": "FORMAÊ- 2028.2 - DIREITO UNIVERSO BARBARA",
         "po": 40,
         "real": 29,
         "perc": 72.5,
-        "inadimplencia": 0
+        "inadimplencia": 20726.03
       },
       {
         "turma": "FORMAÊ- 2028.2 - ENFERMAGEM CIÊNCIAS MÉDICAS ISABELLA",
         "po": 30,
         "real": 26,
         "perc": 86.7,
-        "inadimplencia": 0
+        "inadimplencia": 7067.42
       },
       {
         "turma": "FORMAÊ- 2026.2 - ARQUITETURA E URBANISMO PUC UNIFICADA YASMIM",
         "po": 60,
         "real": 58,
         "perc": 96.7,
-        "inadimplencia": 0
+        "inadimplencia": 2355.75
       },
       {
         "turma": "FORMAÊ- 2029.1 - TECNOLOGIAS PUC UNIFICADA JULIA",
         "po": 0,
         "real": 5,
         "perc": 0,
-        "inadimplencia": 0
+        "inadimplencia": 1014.42
       },
       {
         "turma": "FORMAÊ- 2029.2 - ODONTOLOGIA NEWTON PAIVA AMANDA",
         "po": 0,
         "real": 1,
         "perc": 0,
-        "inadimplencia": 0
+        "inadimplencia": 435.29
       }
     ]
   }

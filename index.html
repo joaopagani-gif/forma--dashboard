@@ -72,6 +72,17 @@
   .pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-family:'DM Mono',monospace;font-weight:500;}
   .mini-bar{height:5px;border-radius:3px;background:var(--subtle);position:relative;width:80px;display:inline-block;vertical-align:middle;}
   .mini-fill{height:5px;border-radius:3px;position:absolute;left:0;top:0;}
+
+  .est-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;transition:border-color .15s;}
+  .est-card:focus-within{border-color:var(--accent);}
+  .est-turma{font-size:13px;font-weight:500;flex:1;}
+  .est-meta{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;}
+  .est-textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:72px;line-height:1.6;outline:none;transition:border-color .15s;}
+  .est-textarea:focus{border-color:var(--accent);}
+  .est-textarea::placeholder{color:var(--subtle);}
+  .badge-salvo{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;background:var(--green-dim);color:var(--green);}
+  .badge-pend{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;background:rgba(234,179,8,0.12);color:#eab308;}
+
   @media(max-width:900px){main,header,.period-bar{padding-left:16px;padding-right:16px;}.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}.turma-grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -100,6 +111,7 @@
     <button class="tab active" onclick="switchTab('macro',this)">Visão Macro</button>
     <button class="tab" onclick="switchTab('curvas',this)">Curvas por Turma</button>
     <button class="tab" onclick="switchTab('tabela',this)">Tabela Detalhada</button>
+    <button class="tab" onclick="switchTab('estrategias',this);initEstrategias()">Estratégias</button>
   </div>
 
   <div class="tab-content active" id="tab-macro">
@@ -153,6 +165,22 @@
       </table>
     </div>
   </div>
+
+  <div class="tab-content" id="tab-estrategias">
+    <div class="filter-row" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <select id="est-filter-cons" onchange="renderEstrategias()" style="background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;"><option value="">Todos consultores</option></select>
+        <input class="search-input" type="text" id="est-search" placeholder="Buscar turma..." oninput="renderEstrategias()"/>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span id="est-status" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;"></span>
+        <button class="btn" id="btn-salvar" onclick="salvarEstrategias()">&#128190; Salvar tudo</button>
+      </div>
+    </div>
+    <div id="est-grid" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Carregando...</div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -171,8 +199,216 @@ const getDates=()=>[...new Set(fd.map(r=>r.date))].sort();
 const getTurmas=()=>[...new Set(fd.map(r=>r.turma))].sort();
 const getCons=()=>[...new Set(fd.map(r=>r.consultor))].sort();
 
-function applyPeriod(){dateFrom=document.getElementById('date-from').value;dateTo=document.getElementById('date-to').value;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);renderAll();}
-function resetPeriod(){const d=[...new Set(allData.map(r=>r.date))].sort();dateFrom=d[0];dateTo=d[d.length-1];document.getElementById('date-from').value=dateFrom;document.getElementById('date-to').value=dateTo;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);renderAll();}
+function applyPeriod(){dateFrom=document.getElementById('date-from').value;dateTo=document.getElementById('date-to').value;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);
+// ===== ESTRATEGIAS =====
+var WORKER_URL = 'https://formae-estrategias-api.joao-pagani.workers.dev';
+var estData = {};
+var estSha = null;
+var estLoaded = false;
+
+async function initEstrategias() {
+  if (estLoaded) { renderEstrategias(); return; }
+  document.getElementById('est-grid').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Carregando...</div>';
+  try {
+    var r = await fetch(WORKER_URL, { method: 'GET' });
+    if (r.ok) {
+      var d = await r.json();
+      estData = d.data || {};
+      estSha = d.sha || null;
+    }
+  } catch(e) { estData = {}; }
+  estLoaded = true;
+  renderEstrategias();
+}
+
+function renderEstrategias() {
+  var cf = document.getElementById('est-filter-cons').value;
+  var search = document.getElementById('est-search').value.toLowerCase();
+
+  var consEl = document.getElementById('est-filter-cons');
+  var cur = consEl.value;
+  var cons = getCons();
+  consEl.innerHTML = '<option value="">Todos consultores</option>' + cons.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  consEl.value = cur;
+
+  var turmas = getTurmas().filter(function(t) {
+    var row = fd.filter(function(r){ return r.turma === t; }).slice(-1)[0];
+    if (cf && row && row.consultor !== cf) return false;
+    if (search && !t.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  var grid = document.getElementById('est-grid');
+  grid.innerHTML = '';
+
+  turmas.forEach(function(turma) {
+    var row = fd.filter(function(r){ return r.turma === turma; }).slice(-1)[0];
+    if (!row) return;
+    var texto = estData[turma] || '';
+    var safeId = turma.replace(/[^a-z0-9]/gi, '_');
+    var badge = texto ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+    var pct = row.pct != null ? row.pct.toFixed(1) + '%' : '&mdash;';
+    var po = row.po != null ? row.po : '&mdash;';
+
+    var card = document.createElement('div');
+    card.className = 'est-card';
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap;">' +
+        '<div class="est-turma">' + sn(turma) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<span class="est-meta">' + row.consultor + ' &middot; ' + pct + ' (' + row.real + '/' + po + ')</span>' +
+          '<span id="ebadge-' + safeId + '">' + badge + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<textarea class="est-textarea" id="etxt-' + safeId + '" placeholder="Descreva a estratégia para essa turma...">' + texto + '</textarea>';
+    grid.appendChild(card);
+
+    document.getElementById('etxt-' + safeId).addEventListener('input', function() {
+      estData[turma] = this.value;
+      var b = document.getElementById('ebadge-' + safeId);
+      if (b) b.innerHTML = '<span class="badge-pend">&#9679; n\u00e3o salvo</span>';
+      document.getElementById('est-status').textContent = 'Altera\u00e7\u00f5es pendentes';
+    });
+  });
+}
+
+async function salvarEstrategias() {
+  var btn = document.getElementById('btn-salvar');
+  var status = document.getElementById('est-status');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    var r = await fetch(WORKER_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: estData, sha: estSha })
+    });
+    if (r.ok) {
+      var d = await r.json();
+      estSha = d.sha;
+      btn.textContent = '\u2705 Salvo!';
+      status.textContent = '';
+      document.querySelectorAll('[id^="ebadge-"]').forEach(function(el) {
+        var sid = el.id.replace('ebadge-','');
+        var txt = document.getElementById('etxt-' + sid);
+        el.innerHTML = txt && txt.value ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+      });
+      setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 2000);
+    } else { throw new Error('fail'); }
+  } catch(e) {
+    btn.textContent = 'Erro!';
+    status.textContent = 'Tente novamente';
+    setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 3000);
+  }
+}
+// ===== FIM ESTRATEGIAS =====
+
+renderAll();}
+function resetPeriod(){const d=[...new Set(allData.map(r=>r.date))].sort();dateFrom=d[0];dateTo=d[d.length-1];document.getElementById('date-from').value=dateFrom;document.getElementById('date-to').value=dateTo;fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);
+// ===== ESTRATEGIAS =====
+var WORKER_URL = 'https://formae-estrategias-api.joao-pagani.workers.dev';
+var estData = {};
+var estSha = null;
+var estLoaded = false;
+
+async function initEstrategias() {
+  if (estLoaded) { renderEstrategias(); return; }
+  document.getElementById('est-grid').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Carregando...</div>';
+  try {
+    var r = await fetch(WORKER_URL, { method: 'GET' });
+    if (r.ok) {
+      var d = await r.json();
+      estData = d.data || {};
+      estSha = d.sha || null;
+    }
+  } catch(e) { estData = {}; }
+  estLoaded = true;
+  renderEstrategias();
+}
+
+function renderEstrategias() {
+  var cf = document.getElementById('est-filter-cons').value;
+  var search = document.getElementById('est-search').value.toLowerCase();
+
+  var consEl = document.getElementById('est-filter-cons');
+  var cur = consEl.value;
+  var cons = getCons();
+  consEl.innerHTML = '<option value="">Todos consultores</option>' + cons.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  consEl.value = cur;
+
+  var turmas = getTurmas().filter(function(t) {
+    var row = fd.filter(function(r){ return r.turma === t; }).slice(-1)[0];
+    if (cf && row && row.consultor !== cf) return false;
+    if (search && !t.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  var grid = document.getElementById('est-grid');
+  grid.innerHTML = '';
+
+  turmas.forEach(function(turma) {
+    var row = fd.filter(function(r){ return r.turma === turma; }).slice(-1)[0];
+    if (!row) return;
+    var texto = estData[turma] || '';
+    var safeId = turma.replace(/[^a-z0-9]/gi, '_');
+    var badge = texto ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+    var pct = row.pct != null ? row.pct.toFixed(1) + '%' : '&mdash;';
+    var po = row.po != null ? row.po : '&mdash;';
+
+    var card = document.createElement('div');
+    card.className = 'est-card';
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap;">' +
+        '<div class="est-turma">' + sn(turma) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<span class="est-meta">' + row.consultor + ' &middot; ' + pct + ' (' + row.real + '/' + po + ')</span>' +
+          '<span id="ebadge-' + safeId + '">' + badge + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<textarea class="est-textarea" id="etxt-' + safeId + '" placeholder="Descreva a estratégia para essa turma...">' + texto + '</textarea>';
+    grid.appendChild(card);
+
+    document.getElementById('etxt-' + safeId).addEventListener('input', function() {
+      estData[turma] = this.value;
+      var b = document.getElementById('ebadge-' + safeId);
+      if (b) b.innerHTML = '<span class="badge-pend">&#9679; n\u00e3o salvo</span>';
+      document.getElementById('est-status').textContent = 'Altera\u00e7\u00f5es pendentes';
+    });
+  });
+}
+
+async function salvarEstrategias() {
+  var btn = document.getElementById('btn-salvar');
+  var status = document.getElementById('est-status');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    var r = await fetch(WORKER_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: estData, sha: estSha })
+    });
+    if (r.ok) {
+      var d = await r.json();
+      estSha = d.sha;
+      btn.textContent = '\u2705 Salvo!';
+      status.textContent = '';
+      document.querySelectorAll('[id^="ebadge-"]').forEach(function(el) {
+        var sid = el.id.replace('ebadge-','');
+        var txt = document.getElementById('etxt-' + sid);
+        el.innerHTML = txt && txt.value ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+      });
+      setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 2000);
+    } else { throw new Error('fail'); }
+  } catch(e) {
+    btn.textContent = 'Erro!';
+    status.textContent = 'Tente novamente';
+    setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 3000);
+  }
+}
+// ===== FIM ESTRATEGIAS =====
+
+renderAll();}
 
 function snap(date){const s=fd.filter(r=>r.date===date);return{po:s.reduce((a,r)=>a+(r.po||0),0),real:s.reduce((a,r)=>a+r.real,0),inad:s.reduce((a,r)=>a+r.inadimplencia,0),pct:s.filter(r=>r.pct!=null).reduce((a,r,_,arr)=>a+r.pct/arr.length,0),n:s.length};}
 
@@ -353,6 +589,110 @@ function populateFilters(){
 
 function renderAll(){fd=allData.filter(r=>r.date>=dateFrom&&r.date<=dateTo);document.getElementById('period-label').textContent=`${fd2(dateFrom)} → ${fd2(dateTo)}`;populateFilters();renderKPIs();renderStories();renderMacroCharts();renderCurvas();renderTabela();}
 function switchTab(name,btn){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');}
+
+
+// ===== ESTRATEGIAS =====
+var WORKER_URL = 'https://formae-estrategias-api.joao-pagani.workers.dev';
+var estData = {};
+var estSha = null;
+var estLoaded = false;
+
+async function initEstrategias() {
+  if (estLoaded) { renderEstrategias(); return; }
+  document.getElementById('est-grid').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Carregando...</div>';
+  try {
+    var r = await fetch(WORKER_URL, { method: 'GET' });
+    if (r.ok) {
+      var d = await r.json();
+      estData = d.data || {};
+      estSha = d.sha || null;
+    }
+  } catch(e) { estData = {}; }
+  estLoaded = true;
+  renderEstrategias();
+}
+
+function renderEstrategias() {
+  var cf = document.getElementById('est-filter-cons').value;
+  var search = document.getElementById('est-search').value.toLowerCase();
+
+  var consEl = document.getElementById('est-filter-cons');
+  var cur = consEl.value;
+  var cons = getCons();
+  consEl.innerHTML = '<option value="">Todos consultores</option>' + cons.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  consEl.value = cur;
+
+  var turmas = getTurmas().filter(function(t) {
+    var row = fd.filter(function(r){ return r.turma === t; }).slice(-1)[0];
+    if (cf && row && row.consultor !== cf) return false;
+    if (search && !t.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  var grid = document.getElementById('est-grid');
+  grid.innerHTML = '';
+
+  turmas.forEach(function(turma) {
+    var row = fd.filter(function(r){ return r.turma === turma; }).slice(-1)[0];
+    if (!row) return;
+    var texto = estData[turma] || '';
+    var safeId = turma.replace(/[^a-z0-9]/gi, '_');
+    var badge = texto ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+    var pct = row.pct != null ? row.pct.toFixed(1) + '%' : '&mdash;';
+    var po = row.po != null ? row.po : '&mdash;';
+
+    var card = document.createElement('div');
+    card.className = 'est-card';
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap;">' +
+        '<div class="est-turma">' + sn(turma) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<span class="est-meta">' + row.consultor + ' &middot; ' + pct + ' (' + row.real + '/' + po + ')</span>' +
+          '<span id="ebadge-' + safeId + '">' + badge + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<textarea class="est-textarea" id="etxt-' + safeId + '" placeholder="Descreva a estratégia para essa turma...">' + texto + '</textarea>';
+    grid.appendChild(card);
+
+    document.getElementById('etxt-' + safeId).addEventListener('input', function() {
+      estData[turma] = this.value;
+      var b = document.getElementById('ebadge-' + safeId);
+      if (b) b.innerHTML = '<span class="badge-pend">&#9679; n\u00e3o salvo</span>';
+      document.getElementById('est-status').textContent = 'Altera\u00e7\u00f5es pendentes';
+    });
+  });
+}
+
+async function salvarEstrategias() {
+  var btn = document.getElementById('btn-salvar');
+  var status = document.getElementById('est-status');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    var r = await fetch(WORKER_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: estData, sha: estSha })
+    });
+    if (r.ok) {
+      var d = await r.json();
+      estSha = d.sha;
+      btn.textContent = '\u2705 Salvo!';
+      status.textContent = '';
+      document.querySelectorAll('[id^="ebadge-"]').forEach(function(el) {
+        var sid = el.id.replace('ebadge-','');
+        var txt = document.getElementById('etxt-' + sid);
+        el.innerHTML = txt && txt.value ? '<span class="badge-salvo">&#10003; salvo</span>' : '';
+      });
+      setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 2000);
+    } else { throw new Error('fail'); }
+  } catch(e) {
+    btn.textContent = 'Erro!';
+    status.textContent = 'Tente novamente';
+    setTimeout(function() { btn.innerHTML = '&#128190; Salvar tudo'; btn.disabled = false; }, 3000);
+  }
+}
+// ===== FIM ESTRATEGIAS =====
 
 renderAll();
 </script>

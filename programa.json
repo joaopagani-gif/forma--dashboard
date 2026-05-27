@@ -1,9 +1,13 @@
 {
-  "FORMAÊ- 2028.2 - SAÚDE UNIFICADA  UFMG LEANDRO": {
+  "FORMAÃ- 2028.2 - SAÃDE UNIFICADA  UFMG LEANDRO": {
     "checks": [
       "Dados enviados dos interessados",
       "Mapeamento dos interessados"
     ],
     "addedAt": "22/05/2026"
+  },
+  "FORMAÊ- 2026.2 - ENSINO MÉDIO SEBRAE ALÁDIA": {
+    "checks": [],
+    "addedAt": "27/05/2026"
   }
 }

@@ -7,7 +7,10 @@
     "addedAt": "22/05/2026"
   },
   "FORMAÊ- 2029.2 - FISIOTERAPIA CIÊNCIAS MÉDICAS LUCAS": {
-    "checks": [],
+    "checks": [
+      "Dados enviados dos interessados",
+      "Feed extra de adesão"
+    ],
     "addedAt": "27/05/2026"
   }
 }
